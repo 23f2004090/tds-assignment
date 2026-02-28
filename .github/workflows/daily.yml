@@ -14,15 +14,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Daily update for 23f2004090@ds.study.iitm.ac.in
         run: |
-          echo "Daily update $(date)" >> activity.log
+          date >> activity.log
+          cat activity.log
 
-      - name: Commit changes
+      - name: Commit and push changes
         run: |
           git config user.email "23f2004090@ds.study.iitm.ac.in"
           git config user.name "GitHub Action"
-          git add activity.log
-          git diff --staged --quiet || git commit -m "Daily automated commit $(date)"
-          git push
+          git add -A
+          git commit -m "Daily automated commit $(date)"
+          git push origin main
