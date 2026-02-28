@@ -1,0 +1,42 @@
+name: Q13 Scrape Table Sums
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: 23f2004090@ds.study.iitm.ac.in - Scrape and sum tables
+        run: |
+          pip install playwright beautifulsoup4 requests
+          playwright install chromium
+          python3 - << 'EOF'
+          import asyncio
+          from playwright.async_api import async_playwright
+
+          async def main():
+              total = 0
+              async with async_playwright() as p:
+                  browser = await p.chromium.launch()
+                  for seed in range(43, 53):
+                      url = f"https://sanand0.github.io/tdsdata/js_table/?seed={seed}"
+                      page = await browser.new_page()
+                      await page.goto(url, wait_until="networkidle")
+                      await page.wait_for_timeout(2000)
+                      cells = await page.query_selector_all("td")
+                      for cell in cells:
+                          txt = await cell.inner_text()
+                          try:
+                              total += float(txt.strip())
+                          except:
+                              pass
+                      await page.close()
+                  await browser.close()
+              print(f"TOTAL = {total}")
+
+          asyncio.run(main())
+          EOF
